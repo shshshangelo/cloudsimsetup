@@ -1,0 +1,262 @@
+<!--Created by Michael Angelo E. Entera-->
+<!DOCTYPE html> 
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ubuntu GUI - CloudSim with MSSQL Setup Guide</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Ubuntu GUI (Ubuntu 22.04.5 LTS - JellyFish on VMWare)</h1>
+      <h3>Download the Ubuntu OS first, if none: <ul>
+        <li>
+          <a
+            href="https://releases.ubuntu.com/jammy/"
+            target="_blank"
+            >Ubuntu 22.04.5 LTS (Jammy Jellyfish)
+            </a
+          >
+        </li>
+    </ul></h3>
+      <h3>Download this:</h3>
+      <ul>
+        <li>
+          <a
+            href="https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/2024-12/R/eclipse-java-2024-12-R-linux-gtk-x86_64.tar.gz"
+            target="_blank"
+            >Eclipse for Java Developer</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://github.com/Cloudslab/cloudsim/releases/tag/cloudsim-3.0.3"
+            target="_blank"
+            >CloudSim 3.0.3 (.zip)</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://downloads.apache.org/commons/math/binaries/"
+            target="_blank"
+            >Commons-Math3 3.6.1 (.zip)</a
+          >
+        </li>
+        <li>
+          <a
+            href="https://learn.microsoft.com/en-us/sql/connect/jdbc/download-microsoft-jdbc-driver-for-sql-server?view=sql-server-ver16"
+            target="_blank"
+            >SQL JDBC Driver (sdljdbc_12.8.1.0_enu.zip)</a
+          >
+        </li>
+      </ul>
+
+      <p>
+        <strong>Recommendation:</strong> Extract the downloaded `.zip` files
+        into a folder named <code>CloudSim</code> on your Desktop.
+      </p>
+
+      <div class="accordion">
+        <button class="accordion-btn">Step 1: Install Java 8</button>
+        <div class="panel">
+          <p>Open the terminal and run:</p>
+          <pre>
+sudo apt update
+sudo apt install openjdk-8-jdk -y
+java -version
+                </pre
+          >
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-btn">Step 2: Setup Eclipse & CloudSim</button>
+        <div class="panel">
+          <p>Open Eclipse from the terminal:</p>
+          <pre>eclipse &</pre>
+          <ol>
+            <li>Go to <strong>File > New > Java Project</strong></li>
+            <li>
+              Uncheck <em>Use default location</em> and browse to the extracted
+              <code>cloudsim</code> folder.
+            </li>
+            <li>
+              If an error occurs, remove <code>-3.0.3</code> from the name.
+            </li>
+            <li>
+              Go to <strong>Libraries > Classpath > Add External JARs</strong>,
+              then add:
+            </li>
+            <ul>
+              <li><strong>commons-math3</strong> (first one in the list)</li>
+              <li>Repeat the steps for <strong>sdljdbc</strong> JAR files.</li>
+            </ul>
+          </ol>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-btn">Step 3: Create a Java Class</button>
+        <div class="panel">
+          <ol>
+            <li>
+              Right-click on your project <code>cloudsim</code> in the Project
+              Explorer.
+            </li>
+            <li>
+              Select <strong>New > Source Folder</strong> and name it
+              <code>src</code>.
+            </li>
+            <li>Create a package named <code>cloudsim.examples</code>.</li>
+            <li>
+              Right-click the package and create a new Java Class:
+              <code>CloudSimExample</code>.
+            </li>
+            <li>Copy and paste the following code:</li>
+          </ol>
+          <pre>
+import org.cloudbus.cloudsim.*;
+import java.util.Calendar;
+public class CloudSimExample {
+    public static void main(String[] args) {
+        try {
+            int numUser = 1;
+            Calendar calendar = Calendar.getInstance();
+            boolean traceFlag = false;
+            CloudSim.init(numUser, calendar, traceFlag);
+            System.out.println("✅ CloudSim 3.0.3 Simulation Initialized Successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+                </pre
+          >
+          <p>Click the green <strong>Run</strong> button. If you see:</p>
+          <pre>✅ CloudSim 3.0.3 Simulation Initialized Successfully!</pre>
+          <p>Then CloudSim is working! 🎉</p>
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-btn">Step 4: Install MSSQL Server</button>
+        <div class="panel">
+          <p>Run the following commands:</p>
+          <pre>
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/keyrings/microsoft.asc
+echo "deb [signed-by=/etc/apt/keyrings/microsoft.asc] https://packages.microsoft.com/ubuntu/22.04/mssql-server-2022 jammy main" | sudo tee /etc/apt/sources.list.d/mssql-server.list
+sudo apt update
+sudo apt install -y mssql-server
+sudo /opt/mssql/bin/mssql-conf setup
+                </pre
+          >
+          <p>Choose: 2</p>
+          <p>Type: Yes</p>
+          <p>Set your password.</p>
+          <p>Set your confirm password.</p>          
+          <p>Choose: 1</p>
+
+
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-btn">
+          Step 5: Create & Test MSSQL Database
+        </button>
+        <div class="panel">
+          <p>Run the following commands:</p>
+          <pre>
+sudo apt install -y mssql-tools unixodbc-dev                </pre
+>
+<p>Yes</p>
+<p>Yes</p>
+
+<i>Run the following commands again:</i>
+<pre>
+echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
+source ~/.bashrc
+systemctl status mssql-server
+                </pre
+          >
+          <p>To create a database:</p>
+          <pre>
+/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'YOUR_PASSWORD'
+CREATE DATABASE CloudSimDB;
+GO
+SELECT name FROM sys.databases;
+GO
+EXIT
+                </pre
+          >
+        </div>
+      </div>
+
+      <div class="accordion">
+        <button class="accordion-btn">Step 6: Connect Java to MSSQL</button>
+        <div class="panel">
+          <p>
+            Create a new class: <code>TestMSSQLConnection</code> inside
+            <code>cloudsim.examples</code>.
+          </p>
+          <p>Copy and paste this code:</p>
+          <pre>
+package cloudsim.examples;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+public class TestMSSQLConnection {
+    public static void main(String[] args) {
+        String url = "jdbc:sqlserver://localhost:1433;databaseName=CloudSimDB;encrypt=true;trustServerCertificate=true";
+        String user = "SA";
+        String password = "YOUR_PASSWORD";
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+            Connection conn = DriverManager.getConnection(url, user, password);
+            System.out.println("✅ Connected to Microsoft SQL Server!");
+            conn.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+                </pre
+          >
+<p>Find these code:</p>
+          <i>Connection conn = DriverManager.getConnection(url, user, password);
+          </i>
+        <p>Click the error on that line "yellow bulb", then click the "add requires.java.sql" then Save, then Run</p>
+          <p>If you see:</p>
+          <pre>✅ Connected to Microsoft SQL Server!</pre>
+          <p>Your connection is successful!</p>
+        </div>
+
+        
+      </div>
+    </div>
+
+    
+<div class="accordion">
+        <button class="accordion-btn">READ HERE:</button>
+        <div class="panel">
+            <p>Following command to start the mssql-server:</p>
+            <pre>sudo systemctl start mssql-server</pre>
+            <p>Following command to stop the mssql-server:</p>
+            <pre>sudo systemctl stop mssql-server</pre>
+            <p>Following command to status the mssql-server:</p>
+            <pre>sudo systemctl status mssql-server</pre>
+        </div>
+
+    <script src="script.js"></script>
+
+    <center>
+        <p>&copy; Created by Michael Angelo E. Entera</p><strong>DAWAT RAKO GCASH! AHAHAHAHA </strong>
+    </footer></center>
+</body>
+</html>
+
+
+  </body>
+</html>
+
